@@ -1,0 +1,115 @@
+{
+	// Title
+	"window.title": "Glow CAD Exporter",
+
+	// Format on file save
+	"[go]": {
+		"editor.formatOnSave": true,
+		"editor.formatOnSaveMode": "file",
+
+		"editor.defaultFormatter": "golang.go",
+
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": "explicit",
+			"source.removeUnusedImports": "explicit"
+		}
+	},
+
+	// Indent with tabs by default
+	"editor.detectIndentation": true,
+	"editor.insertSpaces": false,
+	"editor.indentSize": "tabSize",
+	"editor.tabSize": 4,
+
+	// Indent with spaces in YAML files
+	"[yaml]": { "editor.insertSpaces": true, "editor.tabSize": 2 },
+
+	// Force file format
+	"files.eol": "\n",
+	"files.encoding": "utf8",
+	"files.insertFinalNewline": true,
+
+	// Force file type associations
+	"files.associations": { "**/*.env*": "dotenv" },
+
+	// Show & trim unnecessary whitespace
+	"editor.renderWhitespace": "trailing", // Preferred for Go's formatting
+	"editor.trimAutoWhitespace": true,
+	"files.trimTrailingWhitespace": true,
+	"files.trimFinalNewlines": true,
+
+	// Close strings, comments & brackets
+	"editor.autoClosingQuotes": "always",
+	"editor.autoClosingComments": "always",
+	"editor.autoClosingBrackets": "always",
+
+	// Show parameter names & enum values
+	"editor.inlayHints.enabled": "on",
+
+	// Highlight matching brackets
+	"editor.bracketPairColorization.enabled": true,
+
+	// Show color picker next to RGB/hex codes
+	"editor.colorDecorators": true,
+
+	// Smoother animations
+	"editor.smoothScrolling": true,
+	"editor.cursorBlinking": "smooth",
+	"editor.cursorStyle": "line-thin",
+	"editor.cursorSmoothCaretAnimation": "on",
+	"terminal.integrated.smoothScrolling": true,
+	"workbench.list.smoothScrolling": true,
+
+	// IntelliSense
+	"editor.inlineSuggest.enabled": true,
+
+	// Pin tabs
+	"workbench.editor.pinnedTabsOnSeparateRow": true,
+	"workbench.editor.preventPinnedEditorClose": "never",
+	"workbench.editor.pinnedTabSizing": "normal",
+	"workbench.editor.showTabs": "multiple",
+
+	// Check code, configs & docs for spelling mistakes
+	"cSpell.language": "en-GB",
+	"cSpell.files": ["**/*.go", "**/*.md"],
+	"cSpell.words": [
+		"electricitymeter",
+		"errgroup",
+		"gasmeter",
+		"GOARCH",
+		"godotenv",
+		"GOOS",
+		"hidlebrand",
+		"mosquitto",
+		"mpan",
+		"mprn",
+		"mqtt",
+		"netlink",
+		"rssi",
+		"scrapeable",
+		"SMETS",
+		"wifi",
+		"zigbee"
+	],
+
+	// Custom colours
+	"workbench.colorCustomizations": {
+		"activityBar.activeBackground": "#ffc300",
+		"activityBar.background": "#ffc300",
+		"activityBar.foreground": "#000000",
+		"activityBar.inactiveForeground": "#000000bb",
+		"activityBarBadge.background": "#000000bb",
+		"activityBarBadge.foreground": "#ffc300",
+		"commandCenter.border": "#00000099",
+		"sash.hoverBorder": "#ffc300",
+		"statusBar.background": "#ffc300",
+		"statusBar.foreground": "#000000",
+		"statusBarItem.hoverBackground": "#ffc300",
+		"statusBarItem.remoteBackground": "#ffc300",
+		"statusBarItem.remoteForeground": "#000000",
+		"titleBar.activeBackground": "#ffc300",
+		"titleBar.activeForeground": "#000000",
+		"titleBar.inactiveBackground": "#ffc30099",
+		"titleBar.inactiveForeground": "#00000099"
+	},
+}

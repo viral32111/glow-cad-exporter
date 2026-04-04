@@ -1,0 +1,10 @@
+# Environment variables
+.env*
+!.env*.example
+
+# Configuration files
+*.toml
+
+# Builds
+*-linux-*
+*.exe

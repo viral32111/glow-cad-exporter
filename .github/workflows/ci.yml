@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - '*/**.go'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/workflows/*.yml'
+    branches:
+      - '**'
+    tags:
+     - '*.*.*'
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: glow-cad-exporter
+  ENTRY_POINT: ./cmd/glow-cad-exporter/main.go
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        operatingSystem: [ 'linux', 'windows' ]
+        architecture: [ 'amd64', '386', 'arm64', 'arm' ]
+        library: [ '', 'glibc', 'musl' ]
+        exclude:
+          # glibc/musl is irrelevant for Windows builds
+          - operatingSystem: windows
+            library: glibc
+          - operatingSystem: windows
+            library: musl
+
+          # glibc/musl is required for Linux builds
+          - operatingSystem: linux
+            library: ''
+
+          # 32-bit ARM is no longer supported on Windows
+          - operatingSystem: windows
+            architecture: arm
+    permissions:
+      contents: read
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+
+      - name: Install build tools
+        if: ${{ matrix.library == 'musl' }}
+        run: sudo apt-get install --no-install-recommends --yes musl-tools
+
+      - name: Construct artifact & executable name
+        id: names
+        env:
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+          OPERATING_SYSTEM: ${{ matrix.operatingSystem }}
+          ARCHITECTURE: ${{ matrix.architecture }}
+          LIBRARY: ${{ matrix.library }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { PROJECT_NAME, OPERATING_SYSTEM, ARCHITECTURE, LIBRARY } = process.env;
+
+            const artifactName = [ PROJECT_NAME, OPERATING_SYSTEM, ARCHITECTURE, LIBRARY ]
+              .filter( value => value != '' )
+              .join( '-' );
+
+            const executableName = artifactName + ( OPERATING_SYSTEM == 'windows' ? '.exe' : '' );
+
+            core.setOutput( 'artifact', artifactName );
+            core.setOutput( 'executable', executableName );
+
+      - name: Build executable
+        env:
+          GOOS: ${{ matrix.operatingSystem }}
+          GOARCH: ${{ matrix.architecture }}
+          CC: ${{ matrix.library == 'musl' && '/usr/bin/musl-gcc' || '' }}
+        run: go build -v -ldflags='-s -w' -o ${{ steps.names.outputs.executable }} ${{ env.ENTRY_POINT }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.names.outputs.artifact }}
+          path: ${{ steps.names.outputs.executable }}
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: Move executables
+        run: |
+          mv -v artifacts/${{ env.PROJECT_NAME }}-*/${{ env.PROJECT_NAME }}-* ./
+          rm -v -r artifacts
+
+      - name: Calculate checksums
+        run: |
+          md5sum ${{ env.PROJECT_NAME }}-* > MD5SUMS.txt
+          sha1sum ${{ env.PROJECT_NAME }}-* > SHA1SUMS.txt
+          sha256sum ${{ env.PROJECT_NAME }}-* > SHA256SUMS.txt
+          sha512sum ${{ env.PROJECT_NAME }}-* > SHA512SUMS.txt
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: ${{ github.ref_name }}
+          files: |
+            ${{ env.PROJECT_NAME }}-*
+            *SUMS.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
