@@ -10,9 +10,8 @@ import (
 	"github.com/viral32111/glow-cad-exporter/internal/config"
 )
 
-const (
-	VERSION = "0.1.0"
-)
+// -ldflags="-X main.VERSION=X.X.X"
+var VERSION = "0.0.0"
 
 func main() {
 	godotenv.Load()
@@ -25,12 +24,20 @@ func main() {
 
 	/***********************/
 
-	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	logOptions := &slog.HandlerOptions{
 		Level: config.LogLevel,
-	}))
+	}
+
+	var log *slog.Logger
+	if VERSION == "0.0.0" {
+		log = slog.New(slog.NewTextHandler(os.Stdout, logOptions))
+	} else {
+		log = slog.New(slog.NewJSONHandler(os.Stdout, logOptions))
+	}
+
 	slog.SetDefault(log)
 
-	log.Info("Hello", "version", VERSION)
+	log.Info("Hello World", "version", VERSION)
 
 	/***********************/
 

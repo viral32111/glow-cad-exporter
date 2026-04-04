@@ -81,7 +81,13 @@ jobs:
           GOOS: ${{ matrix.operatingSystem }}
           GOARCH: ${{ matrix.architecture }}
           CC: ${{ matrix.library == 'musl' && '/usr/bin/musl-gcc' || '' }}
-        run: go build -v -ldflags='-s -w' -o ${{ steps.names.outputs.executable }} ${{ env.ENTRY_POINT }}
+        run: |
+          VERSION="${GITHUB_SHA::7}"
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            VERSION="${{ github.ref_name }}"
+          fi
+
+          go build -v -ldflags="-s -w -X main.VERSION=${VERSION}" -o ${{ steps.names.outputs.executable }} ${{ env.ENTRY_POINT }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
