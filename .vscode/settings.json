@@ -88,6 +88,8 @@
 		"rssi",
 		"scrapeable",
 		"SMETS",
+		"standingcharge",
+		"unitrate",
 		"wifi",
 		"zigbee"
 	],

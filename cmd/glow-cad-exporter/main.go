@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,35 +8,16 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
-	mqtt "github.com/mochi-mqtt/server/v2"
+	mochi "github.com/mochi-mqtt/server/v2"
 	"github.com/mochi-mqtt/server/v2/hooks/auth"
 	"github.com/mochi-mqtt/server/v2/listeners"
-	"github.com/mochi-mqtt/server/v2/packets"
 
 	"github.com/viral32111/glow-cad-exporter/internal/config"
+	"github.com/viral32111/glow-cad-exporter/internal/mqtt"
 )
 
 // -ldflags="-X main.VERSION=X.X.X"
 var VERSION = "0.0.0"
-
-type GlowHook struct {
-	mqtt.HookBase
-}
-
-func (hook *GlowHook) ID() string { return "glow" }
-
-func (hook *GlowHook) Provides(buffer byte) bool {
-	return bytes.Contains([]byte{
-		mqtt.OnPublished,
-	}, []byte{buffer})
-}
-
-func (hook *GlowHook) OnPublished(mqttClient *mqtt.Client, mqttPacket packets.Packet) {
-	topicName := mqttPacket.TopicName
-	message := string(mqttPacket.Payload)
-
-	slog.Debug("Received MQTT message", "topic", topicName, "message", message)
-}
 
 func main() {
 	isLocalDevelopment := false
@@ -83,7 +63,7 @@ func main() {
 
 	/***********************/
 
-	mqttServer := mqtt.New(&mqtt.Options{})
+	mqttServer := mochi.New(&mochi.Options{})
 
 	// Only output warnings & errors from the MQTT server itself
 	mqttLogOptions := &slog.HandlerOptions{Level: slog.LevelDebug}
@@ -93,12 +73,17 @@ func main() {
 		mqttServer.Log = slog.New(slog.NewJSONHandler(os.Stdout, mqttLogOptions))
 	}
 
+	// Require authentication if username/password is set, otherwise allow anonymous connections
 	if (config.MQTTUser != "") && (config.MQTTPassword != "") {
 		// https://github.com/mochi-mqtt/server?tab=readme-ov-file#access-control
 		if err := mqttServer.AddHook(new(auth.Hook), &auth.Options{
 			Ledger: &auth.Ledger{
 				Auth: auth.AuthRules{
-					{Username: auth.RString(config.MQTTUser), Password: auth.RString(config.MQTTPassword), Allow: true},
+					{
+						Username: auth.RString(config.MQTTUser),
+						Password: auth.RString(config.MQTTPassword),
+						Allow:    true,
+					},
 				},
 			},
 		}); err != nil {
@@ -106,15 +91,16 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		// Allow anonymous connections if no username/password is set
 		if err := mqttServer.AddHook(new(auth.AllowHook), nil); err != nil {
 			slog.Error("Unable to add MQTT anonymous hook", "error", err)
 			os.Exit(1)
 		}
 	}
 
-	if err := mqttServer.AddHook(new(GlowHook), nil); err != nil {
-		slog.Error("Unable to add our hooks to MQTT server", "error", err)
+	if err := mqttServer.AddHook(&mqtt.Hooks{
+		Config: config,
+	}, nil); err != nil {
+		slog.Error("Unable to add MQTT glow hook", "error", err)
 		os.Exit(1)
 	}
 
