@@ -9,15 +9,16 @@ import (
 	"time"
 
 	"github.com/viral32111/glow-cad-exporter/internal/config"
-	"github.com/viral32111/glow-cad-exporter/internal/redis"
 )
 
 type Server struct {
+	Config          config.Config
 	HTTPMultiplexer *http.ServeMux
 }
 
-func New(config config.Config, redisClient *redis.Client) (*Server, error) {
+func New(config config.Config) (*Server, error) {
 	server := &Server{
+		Config:          config,
 		HTTPMultiplexer: http.NewServeMux(),
 	}
 
@@ -27,12 +28,12 @@ func New(config config.Config, redisClient *redis.Client) (*Server, error) {
 	return server, nil
 }
 
-func (server *Server) Start(ctx context.Context, address string) error {
-	slog.Debug("Starting HTTP server", "address", address)
+func (this *Server) Start(ctx context.Context, listenAddress string) error {
+	slog.Debug("Starting HTTP server", "address", listenAddress)
 
 	httpServer := &http.Server{
-		Addr:    address,
-		Handler: server.HTTPMultiplexer,
+		Addr:    listenAddress,
+		Handler: this.HTTPMultiplexer,
 	}
 
 	go func() {
@@ -46,9 +47,9 @@ func (server *Server) Start(ctx context.Context, address string) error {
 		}
 	}()
 
-	slog.Info("HTTP server listening", "address", address)
+	slog.Info("HTTP server listening", "address", listenAddress)
 	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
-		return fmt.Errorf("Unable to start HTTP server on '%s': %w", address, err)
+		return fmt.Errorf("Unable to start HTTP server on '%s': %w", listenAddress, err)
 	}
 
 	slog.Info("HTTP server stopped")
@@ -56,16 +57,16 @@ func (server *Server) Start(ctx context.Context, address string) error {
 	return nil
 }
 
-func (server *Server) RegisterRoutes() {
-	// server.HTTPMultiplexer.Handle("GET /example", routes.ExampleRouteHandler(server.RouteContext))
+func (this *Server) RegisterRoutes() {
+	// this.HTTPMultiplexer.Handle("GET /example", routes.ExampleRouteHandler(server.RouteContext))
 
-	server.HTTPMultiplexer.Handle("/", http.HandlerFunc(server.NotFoundHandler))
+	this.HTTPMultiplexer.Handle("/", http.HandlerFunc(this.NotFoundHandler))
 }
 
-func (server *Server) NotFoundHandler(response http.ResponseWriter, request *http.Request) {
+func (this *Server) NotFoundHandler(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	response.WriteHeader(404)
 	json.NewEncoder(response).Encode(map[string]any{
-		"error": "Unknown API route",
+		"error": "Unknown route",
 	})
 }

@@ -32,9 +32,9 @@ This is a fundamental limitation of most smart meter installations (gas meters a
 * `ethernet`: MAC address of the Glow CAD's Ethernet interface.
 * `wifi`: MAC address of the Glow CAD's Wi-Fi interface.
 * `eui`: EUI-64 of the Glow CAD's Zigbee radio.
+* `hardware`: Hardware revision of the Glow CAD.
 * `firmware`: Firmware version of the Glow CAD.
 * `zigbee`: Zigbee stack version of the Glow CAD.
-* `revision`: Hardware revision of the Glow CAD.
 
 <details>
 <summary>Click to view the raw JSON message published by the Glow CAD</summary>
