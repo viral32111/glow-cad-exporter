@@ -22,10 +22,19 @@ This is a fundamental limitation of most smart meter installations (gas meters a
 
 ### 📡 Device Status
 
-* `glow_status{ethernet="",wifi="",eui="",firmware="",zigbee="",revision=""}`: Zigbee connection status (`0`: connected, `1`: reconnecting, `2`: not connected).
-* `glow_rssi{ethernet="",wifi="",eui="",firmware="",zigbee="",revision=""}`: Zigbee signal strength in dBm to the smart meter's Communications Hub.
-* `glow_lqi{ethernet="",wifi="",eui="",firmware="",zigbee="",revision=""}`: Zigbee signal quality score from 0 to 255.
-* `glow_timestamp{ethernet="",wifi="",eui="",firmware="",zigbee="",revision=""}`: Unix timestamp of the last received state update from the Glow CAD.
+* `glow_status`: Zigbee connection status (`0`: connected, `1`: reconnecting, `2`: not connected).
+* `glow_rssi`: Zigbee signal strength in dBm to the smart meter's Communications Hub.
+* `glow_lqi`: Zigbee signal quality score from 0 to 255.
+* `glow_timestamp`: Unix timestamp of the last received state update from the Glow CAD.
+
+#### Labels
+
+* `ethernet`: MAC address of the Glow CAD's Ethernet interface.
+* `wifi`: MAC address of the Glow CAD's Wi-Fi interface.
+* `eui`: EUI-64 of the Glow CAD's Zigbee radio.
+* `firmware`: Firmware version of the Glow CAD.
+* `zigbee`: Zigbee stack version of the Glow CAD.
+* `revision`: Hardware revision of the Glow CAD.
 
 <details>
 <summary>Click to view the raw JSON message published by the Glow CAD</summary>
@@ -53,15 +62,20 @@ This is a fundamental limitation of most smart meter installations (gas meters a
 
 ### 🔌 Electricity Meter
 
-* `glow_electric_import_cumulative{supplier="",mpan=""}`: Electricity consumption in kWh since the smart meter was commissioned (a.k.a. meter reading).
-* `glow_electric_import_day{supplier="",mpan=""}`: Electricity consumption in kWh for the last 24 hours.
-* `glow_electric_import_week{supplier="",mpan=""}`: Electricity consumption in kWh for the last 7 days.
-* `glow_electric_import_month{supplier="",mpan=""}`: Electricity consumption in kWh for the last 30 days.
-* `glow_electric_export_cumulative{supplier="",mpan=""}`: Electricity generation in kWh since the smart meter was commissioned. Only applicable if you sell electricity back to the grid.
-* `glow_electric_tariff_standing_charge{supplier="",mpan=""}`: Your supplier's standing charge in GBP/day.
-* `glow_electric_tariff_unit_rate{supplier="",mpan=""}`: Your cost per kWh in GBP.
-* `glow_electric_power{supplier="",mpan=""}`: Current power consumption (positive value) or generation (negative value) in kW.
-* `glow_electric_timestamp{supplier="",mpan=""}`: Unix timestamp of the last received electricity meter update.
+* `glow_electric_import_cumulative`: Electricity consumption in kWh since the smart meter was commissioned (a.k.a. meter reading).
+* `glow_electric_import_day`: Electricity consumption in kWh for the last 24 hours.
+* `glow_electric_import_week`: Electricity consumption in kWh for the last 7 days.
+* `glow_electric_import_month`: Electricity consumption in kWh for the last 30 days.
+* `glow_electric_export_cumulative`: Electricity generation in kWh since the smart meter was commissioned. Only applicable if you sell electricity back to the grid.
+* `glow_electric_tariff_standing_charge`: Your supplier's standing charge in GBP/day.
+* `glow_electric_tariff_unit_rate`: Your cost per kWh in GBP.
+* `glow_electric_power`: Current power consumption (positive value) or generation (negative value) in kW.
+* `glow_electric_timestamp`: Unix timestamp of the last received electricity meter update.
+
+#### Labels
+
+* `supplier`: Name of your electricity supplier.
+* `mpan`: Meter Point Administration Number of your electricity meter.
 
 <details>
 <summary>Click to view the raw JSON message published by the Glow CAD</summary>
@@ -102,17 +116,22 @@ This is a fundamental limitation of most smart meter installations (gas meters a
 
 ### 🌡️ Gas Meter
 
-* `glow_gas_cumulative{supplier="",mprn=""}`: Gas consumption in kWh since the smart meter was commissioned (a.k.a. meter reading).
-* `glow_gas_cumulative_volume{supplier="",mprn=""}`: Gas consumption in cubic meters since the smart meter was commissioned (a.k.a. meter reading).
-* `glow_gas_day{supplier="",mprn=""}`: Gas consumption in kWh for the last 24 hours.
-* `glow_gas_day_volume{supplier="",mprn=""}`: Gas consumption in cubic meters for the last 24 hours.
-* `glow_gas_week{supplier="",mprn=""}`: Gas consumption in kWh for the last 7 days.
-* `glow_gas_week_volume{supplier="",mprn=""}`: Gas consumption in cubic meters for the last 7 days.
-* `glow_gas_month{supplier="",mprn=""}`: Gas consumption in kWh for the last 30 days.
-* `glow_gas_month_volume{supplier="",mprn=""}`: Gas consumption in cubic meters for the last 30 days.
-* `glow_gas_tariff_standing_charge{supplier="",mprn=""}`: Your supplier's standing charge in GBP/day.
-* `glow_gas_tariff_unit_rate{supplier="",mprn=""}`: Your cost per kWh in GBP.
-* `glow_gas_timestamp{supplier="",mprn=""}`: Unix timestamp of the last received gas meter update.
+* `glow_gas_cumulative`: Gas consumption in kWh since the smart meter was commissioned (a.k.a. meter reading).
+* `glow_gas_cumulative_volume`: Gas consumption in cubic meters since the smart meter was commissioned (a.k.a. meter reading).
+* `glow_gas_day`: Gas consumption in kWh for the last 24 hours.
+* `glow_gas_day_volume`: Gas consumption in cubic meters for the last 24 hours.
+* `glow_gas_week`: Gas consumption in kWh for the last 7 days.
+* `glow_gas_week_volume`: Gas consumption in cubic meters for the last 7 days.
+* `glow_gas_month`: Gas consumption in kWh for the last 30 days.
+* `glow_gas_month_volume`: Gas consumption in cubic meters for the last 30 days.
+* `glow_gas_tariff_standing_charge`: Your supplier's standing charge in GBP/day.
+* `glow_gas_tariff_unit_rate`: Your cost per kWh in GBP.
+* `glow_gas_timestamp`: Unix timestamp of the last received gas meter update.
+
+#### Labels
+
+* `supplier`: Name of your gas supplier.
+* `mprn`: Meter Point Reference Number of your gas meter.
 
 <details>
 <summary>Click to view the raw JSON message published by the Glow CAD</summary>
