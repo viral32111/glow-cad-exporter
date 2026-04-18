@@ -62,7 +62,7 @@ jobs:
           OPERATING_SYSTEM: ${{ matrix.operatingSystem }}
           ARCHITECTURE: ${{ matrix.architecture }}
           LIBRARY: ${{ matrix.library }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { PROJECT_NAME, OPERATING_SYSTEM, ARCHITECTURE, LIBRARY } = process.env;
@@ -121,7 +121,7 @@ jobs:
           sha512sum ${{ env.PROJECT_NAME }}-* > SHA512SUMS.txt
 
       - name: Create draft release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           tag_name: ${{ github.ref_name }}
