@@ -17,8 +17,7 @@ No MQTT broker (e.g., Mosquitto) is necessary since this project acts as a stub 
 
 ## 📊 Metrics
 
-Electricity readings are updated every 6-10 seconds, while gas readings are updated every 30 minutes.
-This is a fundamental limitation of most smart meter installations (gas meters are battery powered and thus need to have low energy usage) and not the fault of the Glow CAD or this project.**
+Electricity readings are updated every 6-10 seconds, while gas readings are updated every 30 minutes. **This is a fundamental limitation of most smart meter installations (gas meters are battery powered and thus need to have low energy usage) and not the fault of the Glow CAD or this project.**
 
 ### 📡 Device Status
 
