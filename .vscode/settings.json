@@ -80,6 +80,8 @@
 		"godotenv",
 		"GOOS",
 		"hidlebrand",
+		"ldflags",
+		"libc",
 		"mosquitto",
 		"mpan",
 		"mprn",

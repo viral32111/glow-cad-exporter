@@ -7,15 +7,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/viral32111/glow-cad-exporter/internal/broker"
 	"github.com/viral32111/glow-cad-exporter/internal/config"
+	"github.com/viral32111/glow-cad-exporter/internal/flags"
+	"github.com/viral32111/glow-cad-exporter/internal/log"
 	"github.com/viral32111/glow-cad-exporter/internal/metrics"
 	"github.com/viral32111/glow-cad-exporter/internal/server"
 )
@@ -24,9 +23,20 @@ import (
 var VERSION = "0.0.0"
 
 func main() {
-	isLocalDevelopment := false
-	if VERSION == "0.0.0" {
-		isLocalDevelopment = true
+	isLocalDevelopment := VERSION == "0.0.0"
+
+	/***********************/
+
+	flagResult := flags.Parse()
+
+	if flagResult.Version {
+		fmt.Println(VERSION)
+		os.Exit(0)
+	}
+
+	if flagResult.Usage {
+		flags.PrintUsage(os.Stdout)
+		os.Exit(0)
 	}
 
 	/***********************/
@@ -41,17 +51,9 @@ func main() {
 
 	/***********************/
 
-	var log *slog.Logger
-	logOptions := &slog.HandlerOptions{Level: config.LogLevel}
-	if isLocalDevelopment {
-		log = slog.New(slog.NewTextHandler(os.Stdout, logOptions))
-	} else {
-		log = slog.New(slog.NewJSONHandler(os.Stdout, logOptions))
-	}
+	logger := log.NewLogger(config.LogLevel, isLocalDevelopment)
 
-	slog.SetDefault(log)
-
-	log.Info("Hello World", "version", VERSION)
+	logger.Info("Hello World", "version", VERSION)
 
 	/***********************/
 
@@ -70,34 +72,24 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	executionGroup, ctx := errgroup.WithContext(ctx)
+	group, ctx := errgroup.WithContext(ctx)
 
 	/***********************/
 
 	httpServer, err := server.New(config)
 	if err != nil {
-		log.Error("Unable to create HTTP server", "error", err)
+		logger.Error("Unable to create HTTP server", "error", err)
 		os.Exit(1)
 	}
 
-	// Creating a new registry discards Go built-in metrics (runtime, process, etc.)
-	prometheusRegistry := prometheus.NewRegistry()
+	prometheusRegistry := metrics.NewRegistry(config.MetricsGoBuiltin)
 	metrics.Register(prometheusRegistry)
 
 	// Serve metrics on the configured path
-	httpServer.HTTPMultiplexer.Handle(config.MetricsPath, promhttp.HandlerFor(prometheusRegistry, promhttp.HandlerOpts{
-		Registry: prometheusRegistry,
-
-		EnableOpenMetrics: true,
-
-		DisableCompression: false,
-
-		MaxRequestsInFlight: 25,
-		Timeout:             10 * time.Second,
-	}))
+	httpServer.HTTPMultiplexer.Handle(config.MetricsPath, metrics.Handler(prometheusRegistry))
 
 	// Start HTTP server in the background
-	executionGroup.Go(func() error {
+	group.Go(func() error {
 		listenAddress := fmt.Sprintf("%s:%d", config.HTTPAddress, config.HTTPPort)
 		if err := httpServer.Start(ctx, listenAddress); err != nil {
 			return fmt.Errorf("HTTP server error: %w", err)
@@ -111,7 +103,7 @@ func main() {
 	mqttServer := broker.NewServer(config, isLocalDevelopment)
 
 	// Start MQTT server in the background
-	executionGroup.Go(func() error {
+	group.Go(func() error {
 		slog.Info("Listening for MQTT messages", "address", config.MQTTAddress, "port", config.MQTTPort)
 		if err := mqttServer.Serve(); err != nil {
 			return fmt.Errorf("MQTT server error: %w", err)
@@ -122,8 +114,8 @@ func main() {
 
 	/***********************/
 
-	if err := executionGroup.Wait(); err != nil {
-		log.Error("Error in execution group", "error", err)
+	if err := group.Wait(); err != nil {
+		logger.Error("Error in execution group", "error", err)
 		os.Exit(1)
 	}
 }

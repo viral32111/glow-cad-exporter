@@ -22,8 +22,8 @@ func parseEnvString(key, fallback string) string {
 
 func parseEnvNumber(key string, fallback int) (int, error) {
 	if value := os.Getenv(ENVIRONMENT_VARIABLE_PREFIX + key); value != "" {
-		var number int
-		if _, err := fmt.Sscanf(value, "%d", &number); err != nil {
+		number, err := strconv.Atoi(value)
+		if err != nil {
 			return 0, fmt.Errorf("Failed to parse %q as integer: %w", value, err)
 		}
 

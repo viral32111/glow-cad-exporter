@@ -15,6 +15,32 @@ It functions the same as a supplier IHD (In-Home Display) to fetch & display you
 This project takes advantage of the local MQTT functionality to receive the data directly over your local network without needing to interact with their cloud API at all, thus you can safely cut off Internet access to the Glow CAD without losing any functionality.
 No MQTT broker (e.g., Mosquitto) is necessary since this project acts as a stub broker to receive the MQTT messages directly from the Glow CAD and expose the relevant data on a Prometheus scrapeable metrics HTTP endpoint.
 
+## 📥 Usage
+
+Download the [latest release](https://github.com/viral32111/glow-cad-exporter/releases/latest) for your platform. There are prebuilt binaries for Linux and Windows, covering both 32-bit and 64-bit architectures of x86 and ARM. **Linux builds are static with no libc dependency, thus work on both glibc & musl systems.**
+
+### 🐳 Docker
+
+There is a Docker image for Linux at [`ghcr.io/viral32111/glow-cad-exporter`](https://github.com/users/viral32111/packages/container/package/glow-cad-exporter). Please choose the appropriate tag for your use case:
+
+| Tag | New features? | Bug fixes? | Breaking changes? | Notes |
+| --- | --- | --- | --- | --- |
+| `:1` | Yes | Yes | No | Recommended for short-term trials. |
+| `:1.0` | No | Yes | No | Recommended for long-term stability. |
+| `:1.0.0` | No | No | No | Not recommended unless dependent on a bug. |
+| `:main` | Yes | Yes | Yes | Not recommended unless actively testing. |
+| `:latest` | Yes | Yes | Yes | Not recommended unless actively testing. |
+
+```bash
+docker container run \
+	--name glow-cad-exporter \
+	--publish 5000:5000 \
+	--publish 1883:1883 \
+	--env GLOW_REDIS_URL=redis://default@redis:6379/0 \
+	--rm \
+	ghcr.io/viral32111/glow-cad-exporter:1.0
+```
+
 ## 📊 Metrics
 
 Electricity readings are updated every 6-10 seconds, while gas readings are updated every 30 minutes. **This is a fundamental limitation of most smart meter installations (gas meters are battery powered and thus need to have low energy usage) and not the fault of the Glow CAD or this project.**
@@ -169,17 +195,17 @@ Electricity readings are updated every 6-10 seconds, while gas readings are upda
 
 ## ⚙️ Configuration
 
-All configuration is via environment variables for easy deployment with Docker. See [`.env.example`](/.env.example).
+All configuration is via environment variables for easy deployment with Docker. See [`.env.example`](/.env.example). A variable that is set to an invalid value is an error, the exporter will refuse to start.
 
 | Name | Type | Description | Default |
 | --- | --- | --- | --- |
 | `GLOW_LOG_LEVEL` | String | Minimum level of logs to print (`debug`, `info`, `warn`, `error`). | `info` |
 | `GLOW_HTTP_ADDRESS` | String | IP address to listen for HTTP requests on. | `127.0.0.1` |
-| `GLOW_HTTP_PORT` | Number | TCP port to listen for HTTP requests on. | `8080` |
-| `GLOW_METRICS_PATH` | String | HTTP path to expose Prometheus metrics on. | `/metrics` |
-| `GLOW_METRICS_GO_BUILTIN` | Boolean | Whether to include Go runtime metrics. | `false` |
+| `GLOW_HTTP_PORT` | Number | TCP port to listen for HTTP requests on (`1` to `65535`). | `5000` |
+| `GLOW_METRICS_PATH` | String | HTTP path to expose Prometheus metrics on. Must start with `/`, must not end with `/` (unless it is just `/`), and must not contain whitespace. | `/metrics` |
+| `GLOW_METRICS_GO_BUILTIN` | Boolean | Whether to include Go runtime & process metrics. | `false` |
 | `GLOW_MQTT_ADDRESS` | String | IP address to listen for MQTT messages on. | `127.0.0.1` |
-| `GLOW_MQTT_PORT` | Number | TCP port to listen for MQTT messages on. | `1883` |
+| `GLOW_MQTT_PORT` | Number | TCP port to listen for MQTT messages on (`1` to `65535`). | `1883` |
 | `GLOW_MQTT_USER` | String | Username for authenticating MQTT connections. | |
 | `GLOW_MQTT_PASSWORD` | String | Password for authenticating MQTT connections. | |
 | `GLOW_MQTT_TOPIC` | String | Prefix for topics published by the Glow CAD. | `glow` |
@@ -188,6 +214,13 @@ All configuration is via environment variables for easy deployment with Docker. 
 | `GLOW_REDIS_STATE_TTL` | Duration | How long to cache device state MQTT messages in Redis. | `24h` |
 | `GLOW_REDIS_ELECTRIC_TTL` | Duration | How long to cache electricity meter MQTT messages in Redis. | `730h` |
 | `GLOW_REDIS_GAS_TTL` | Duration | How long to cache gas meter MQTT messages in Redis. | `730h` |
+
+### 🚩 Flags
+
+| Flag | Description |
+| --- | --- |
+| `-v`, `--version` | Print the version & exit. |
+| `-u`, `--usage` | Show the usage message & exit. `-h` and `--help` are aliases. |
 
 ## 🧰 Development
 

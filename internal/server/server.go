@@ -58,8 +58,6 @@ func (this *Server) Start(ctx context.Context, listenAddress string) error {
 }
 
 func (this *Server) RegisterRoutes() {
-	// this.HTTPMultiplexer.Handle("GET /example", routes.ExampleRouteHandler(server.RouteContext))
-
 	this.HTTPMultiplexer.Handle("/", http.HandlerFunc(this.NotFoundHandler))
 }
 
