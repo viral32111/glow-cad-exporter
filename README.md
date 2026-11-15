@@ -196,27 +196,20 @@ All configuration is via environment variables for easy deployment with Docker. 
 
 ## 🛠️ Building
 
-Run the relevant build command below, assuming you're on a Linux 64-bit (glibc) system.
+Run the relevant build command below, assuming you're on a Linux system.
 
-### Linux 64-bit (glibc)
-
-```bash
-GOOS=linux GOARCH=amd64 \
-	go build -o glow-cad-exporter-v0.0.0-linux-amd64-glibc ./cmd/glow-cad-exporter/main.go
-```
-
-### Linux 64-bit (musl)
+### Linux 64-bit
 
 ```bash
-CC=x86_64-linux-musl-gcc CXX=x86_64-linux-musl-g++ CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
-	go build -o glow-cad-exporter-v0.0.0-linux-amd64-musl ./cmd/glow-cad-exporter/main.go
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 \
+	go build -v -ldflags="-s -w -X main.VERSION=0.0.0" -o glow-cad-exporter-v0.0.0-linux-amd64 ./cmd/glow-cad-exporter/main.go
 ```
 
 ### Windows 64-bit
 
 ```bash
 GOOS=windows GOARCH=amd64 \
-	go build -o glow-cad-exporter-v0.0.0-windows-amd64.exe ./cmd/glow-cad-exporter/main.go
+	go build -v -ldflags="-s -w -X main.VERSION=0.0.0" -o glow-cad-exporter-v0.0.0-windows-amd64.exe ./cmd/glow-cad-exporter/main.go
 ```
 
 ## ⚖️ License
